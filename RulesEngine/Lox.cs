@@ -74,17 +74,12 @@ namespace LoxSharp
             var tokens = scanner.ScanTokens();
 
             Parser parser = new Parser(tokens, _output);
-            var statements = parser.Parse();
+            var expression = parser.Parse();
 
             // Stop if there was a syntax error.
             if (_hadError) return;
 
-            if (printExpressions && statements.Count == 1 && statements[0] is Stmt.Expression exprStmt)
-            {
-                statements[0] = new Stmt.Print(exprStmt.Expr);
-            }
-
-            _interpreter.Interpret(statements);
+            _interpreter.Interpret(expression);
         }
 
         public static string Error(int line, string message)

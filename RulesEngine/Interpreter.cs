@@ -4,26 +4,17 @@ using System.Linq;
 
 namespace LoxSharp
 {
-    public class Interpreter : IExprVisitor<object>, IStmtVisitor<object>
+    public class Interpreter : IExprVisitor<object>
     {
         public enum ExecuteResult
         {
             Continue,
-            Break,
+            Break
         }
 
         public Interpreter(IOutput output)
         {
             _environment = Globals = new Environment();
-
-            Globals.Define("clock",
-                new NativeFunction("clock", (_, __) => new TimeSpan(DateTime.Now.Ticks).TotalSeconds));
-            Globals.Define("print",
-                new NativeFunction("print", (_, a) =>
-                {
-                    _output.WriteLine(a.OfType<string>().FirstOrDefault());
-                    return null;
-                }, 1));
             _output = output;
         }
 
@@ -33,25 +24,14 @@ namespace LoxSharp
         private readonly object _breakInterrupt = new object();
         private readonly IOutput _output;
 
-        public string Interpret(List<Stmt> statements)
-        {
-            try
-            {
-                foreach (var stmt in statements)
-                {
-                    Execute(stmt);
-                }
+        public string Interpret(Expr expression) { 
+            try {
+                Object value = Evaluate(expression);
+                return Stringify(value);
+            } catch (RuntimeException error) {
+                Lox.RuntimeError(error);
+                return error.ToString();
             }
-            catch (RuntimeException ex)
-            {
-                _output.WriteError(Lox.RuntimeError(ex));
-            }
-            return _output.GetOutput();
-        }
-
-        private ExecuteResult Execute(Stmt stmt)
-        {
-            return stmt?.Accept(this) == _breakInterrupt ? ExecuteResult.Break : ExecuteResult.Continue;
         }
 
         private string Stringify(object value)
@@ -220,19 +200,6 @@ namespace LoxSharp
             return expression.Accept(this);
         }
 
-        public object VisitExpressionStmt(Stmt.Expression stmt)
-        {
-            Evaluate(stmt.Expr);
-            return null;
-        }
-
-        public object VisitPrintStmt(Stmt.Print stmt)
-        {
-            var value = Evaluate(stmt.Expr);
-            _output.WriteLine(Stringify(value));
-            return null;
-        }
-
         public object VisitVariableExpr(Expr.Variable expr)
         {
             var value = _environment.Get(expr.Name);
@@ -242,71 +209,12 @@ namespace LoxSharp
             return value;
         }
 
-        public object VisitVarStmt(Stmt.Var stmt)
-        {
-            object value = _undefined;
-
-            if (stmt.Initializer != null)
-                value = Evaluate(stmt.Initializer);
-
-            _environment.Define(stmt.Name.Lexeme, value);
-
-            return null;
-        }
-
         public object VisitAssignExpr(Expr.Assign expr)
         {
             var value = Evaluate(expr.Value);
 
             _environment.Assign(expr.Name, value);
             return value;
-        }
-
-        public object VisitBlockStmt(Stmt.Block stmt)
-        {
-            var result = ExecuteBlock(stmt.Statements, new Environment(_environment));
-
-            return result == ExecuteResult.Break ? _breakInterrupt : null;
-        }
-
-        public ExecuteResult ExecuteBlock(IEnumerable<Stmt> statements, Environment environment)
-        {
-            var previous = _environment;
-
-            try
-            {
-                _environment = environment;
-
-                foreach (var statement in statements)
-                {
-                    if (Execute(statement) == ExecuteResult.Break)
-                        return ExecuteResult.Break;
-                }
-            }
-            finally
-            {
-                _environment = previous;
-            }
-
-            return ExecuteResult.Continue;
-        }
-
-        public object VisitIfStmt(Stmt.If stmt)
-        {
-            var condition = Evaluate(stmt.Condition);
-
-            if (IsTruthy(condition))
-            {
-                if (Execute(stmt.ThenBranch) == ExecuteResult.Break)
-                    return _breakInterrupt;
-            }
-            else if (stmt.ElseBranch != null)
-            {
-                if (Execute(stmt.ElseBranch) == ExecuteResult.Break)
-                    return _breakInterrupt;
-            }
-
-            return null;
         }
 
         // var thing = this && that;
@@ -328,22 +236,6 @@ namespace LoxSharp
             return Evaluate(expr.Right);
         }
 
-        public object VisitWhileStmt(Stmt.While stmt)
-        {
-            while (IsTruthy(Evaluate(stmt.Condition)))
-            {
-                if (Execute(stmt.Body) == ExecuteResult.Break)
-                    break;
-            }
-
-            return null;
-        }
-
-        public object VisitBreakStmt(Stmt.Break stmt)
-        {
-            return _breakInterrupt;
-        }
-
         public object VisitCallExpr(Expr.Call expr)
         {
             var callee = Evaluate(expr.Callee);
@@ -362,24 +254,6 @@ namespace LoxSharp
             }
 
             throw new RuntimeException(expr.Parenthesis, "Can only call functions and classes.");
-        }
-
-        public object VisitFunctionStmt(Stmt.Function stmt)
-        {
-            var function = new Function(stmt, _environment);
-            _environment.Define(stmt.Name.Lexeme, function);
-
-            return null;
-        }
-
-        public object VisitReturnStmt(Stmt.Return stmt)
-        {
-            object value = null;
-
-            if (stmt.Value != null)
-                value = Evaluate(stmt.Value);
-
-            throw new Return(value);
         }
     }
 }

@@ -213,11 +213,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/auron/Vault23/workspace/MortgageHouse/RulesEngine/RulesEngine.csproj",
+      "projectUniqueName": "/home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/RulesEngine.csproj",
       "projectName": "RulesEngine",
-      "projectPath": "/home/auron/Vault23/workspace/MortgageHouse/RulesEngine/RulesEngine.csproj",
+      "projectPath": "/home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/RulesEngine.csproj",
       "packagesPath": "/home/auron/.nuget/packages/",
-      "outputPath": "/home/auron/Vault23/workspace/MortgageHouse/RulesEngine/obj/",
+      "outputPath": "/home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/auron/.nuget/NuGet/NuGet.Config"
