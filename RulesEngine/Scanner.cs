@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LoxSharp
+namespace RuleEngine.LoxSharp
 {
     public class Scanner
     {
@@ -17,21 +17,10 @@ namespace LoxSharp
         {
             { "and",    TokenType.And },
             { "or",     TokenType.Or },
-            { "if",     TokenType.If },
-            { "else",   TokenType.Else },
-            { "class",  TokenType.Class },
             { "true",   TokenType.True },
             { "false",  TokenType.False },
-            { "for",    TokenType.For },
-            { "while",  TokenType.While },
-            { "fun",    TokenType.Fun },
             { "nil",    TokenType.Nil },
-            { "print",  TokenType.Print },
-            { "return", TokenType.Return },
-            { "this",   TokenType.This },
-            { "super",  TokenType.Super },
             { "var",    TokenType.Var },
-            { "break",  TokenType.Break },
         };
 
         public Scanner(string source, IOutput output)
@@ -60,8 +49,6 @@ namespace LoxSharp
             {
                 case '(': AddToken(TokenType.LeftParenthesis); break;
                 case ')': AddToken(TokenType.RightParenthesis); break;
-                case '{': AddToken(TokenType.LeftBrace); break;
-                case '}': AddToken(TokenType.RightBrace); break;
                 case ',': AddToken(TokenType.Comma); break;
                 case '.': AddToken(TokenType.Dot); break;
                 case '-': AddToken(TokenType.Minus); break;

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace LoxSharp
+namespace RuleEngine.LoxSharp
 {
     public abstract class Expr
     {

@@ -1,85 +1,19 @@
 ﻿using System;
 using System.IO;
 
-namespace LoxSharp
+namespace RuleEngine.LoxSharp
 {
     class Lox
     {
         static bool _hadError = false;
         static bool _hadRuntimeError = false;
         static readonly IOutput _output = new ConsoleOutput();
-        static readonly Interpreter _interpreter = new Interpreter(_output);
-
-        static int Main(string[] args)
-        {
-            int exitCode = 0;
-
-            if (args.Length > 2)
-            {
-                Console.WriteLine("Usage: loxsharp script [stay]");
-            }
-            else if (args.Length > 0)
-            {
-                exitCode = RunFile(args[0]);
-
-                if (args.Length == 2 && string.Equals(args[1], "stay", StringComparison.InvariantCultureIgnoreCase))
-                    Console.ReadLine();
-            }
-            else
-            {
-                RunPrompt();
-            }
-
-            return exitCode;
-        }
+        static readonly Interpreter _interpreter = new Interpreter();
 
         public static string RuntimeError(RuntimeException ex)
         {
             _hadRuntimeError = true;
             return $"{ex.Message}\n[line {ex.Token.Line:N0}]";
-        }
-
-        static int RunFile(string path)
-        {
-            var code = File.ReadAllText(path);
-            Run(code);
-
-            if (_hadError)
-                return 65;
-            else if (_hadRuntimeError)
-                return 70;
-            else
-                return 0;
-        }
-
-        static void RunPrompt()
-        {
-            while (true)
-            {
-                Console.Write("> ");
-
-                var line = Console.ReadLine();
-                if (!line.TrimEnd().EndsWith(";"))
-                    line = line + ";";
-
-                Run(line, printExpressions: true);
-
-                _hadError = false;
-            }
-        }
-
-        static void Run(string source, bool printExpressions = false)
-        {
-            Scanner scanner = new Scanner(source, _output);
-            var tokens = scanner.ScanTokens();
-
-            Parser parser = new Parser(tokens, _output);
-            var expression = parser.Parse();
-
-            // Stop if there was a syntax error.
-            if (_hadError) return;
-
-            _interpreter.Interpret(expression);
         }
 
         public static string Error(int line, string message)

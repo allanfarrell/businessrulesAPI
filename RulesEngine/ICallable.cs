@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace LoxSharp
+namespace RuleEngine.LoxSharp
 {
     public interface ICallable
     {

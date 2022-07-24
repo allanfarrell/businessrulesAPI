@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LoxSharp
+namespace RuleEngine.LoxSharp
 {
     internal class ParseException : SystemException
     {

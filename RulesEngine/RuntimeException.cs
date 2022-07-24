@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LoxSharp
+namespace RuleEngine.LoxSharp
 {
     public class RuntimeException : SystemException
     {

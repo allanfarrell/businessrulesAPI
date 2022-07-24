@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LoxSharp
+namespace RuleEngine.LoxSharp
 {
     public class Parser
     {
@@ -17,254 +17,64 @@ namespace LoxSharp
             _output = output;
         }
 
-        public Expr Parse() {
-            try {
-                return Expression();
-            } catch (ParseException error) {
+        public List<Stmt> Parse()
+        {
+            var list = new List<Stmt>();
+            try
+            {
+                while (!IsAtEnd())
+                {
+                    list.Add(Declaration());
+                }
+            }
+            catch (ParseException)
+            {
+                return null;
+            }
+
+            return list;
+        }
+
+        private Stmt Declaration()
+        {
+            try
+            {
+                if (Match(TokenType.Var))
+                    return VarDeclaration();
+
+                return Statement();
+            }
+            catch (ParseException)
+            {
+                Synchronize();
                 return null;
             }
         }
 
-        // public List<Stmt> Parse()
-        // {
-        //     var list = new List<Stmt>();
-        //     try
-        //     {
-        //         while (!IsAtEnd())
-        //         {
-        //             list.Add(Declaration());
-        //         }
-        //     }
-        //     catch (ParseException)
-        //     {
-        //         return null;
-        //     }
+        private Stmt VarDeclaration()
+        {
+            var name = Consume(TokenType.Identifier, "Expect variable name.");
 
-        //     return list;
-        // }
+            Expr initializer = null;
+            if (Match(TokenType.Equal))
+                initializer = Expression();
 
-        // private Stmt Declaration()
-        // {
-        //     try
-        //     {
-        //         if (Match(TokenType.Fun))
-        //             return Function("function");
+            Consume(TokenType.Semicolon, "Expect ';' after variable declaration.");
 
-        //         if (Match(TokenType.Var))
-        //             return VarDeclaration();
+            return new Stmt.Var(name, initializer);
+        }
 
-        //         return Statement();
-        //     }
-        //     catch (ParseException)
-        //     {
-        //         Synchronize();
-        //         return null;
-        //     }
-        // }
+        private Stmt Statement()
+        {
+            return ExpressionStatement();
+        }
 
-        // private Stmt Function(string kind)
-        // {
-        //     var name = Consume(TokenType.Identifier, $"Expect {kind} name.");
-
-        //     Consume(TokenType.LeftParenthesis, $"Expect '(' after {kind} name.");
-
-        //     var parameters = new List<Token>();
-        //     if (!Check(TokenType.RightParenthesis))
-        //     {
-        //         do
-        //         {
-        //             if (parameters.Count >= 8)
-        //                 Error(Peek(), "Cannot have more than 8 parameters.");
-
-        //             parameters.Add(Consume(TokenType.Identifier, "Expect parameter name."));
-        //         } while (Match(TokenType.Comma));
-        //     }
-
-        //     Consume(TokenType.RightParenthesis, "Expect ')' after parameters.");
-        //     Consume(TokenType.LeftBrace, $"Expect '{{' before {kind} body.");
-
-        //     var body = Block();
-        //     return new Stmt.Function(name, parameters, body);
-        // }
-
-        // private Stmt VarDeclaration()
-        // {
-        //     var name = Consume(TokenType.Identifier, "Expect variable name.");
-
-        //     Expr initializer = null;
-        //     if (Match(TokenType.Equal))
-        //         initializer = Expression();
-
-        //     Consume(TokenType.Semicolon, "Expect ';' after variable declaration.");
-
-        //     return new Stmt.Var(name, initializer);
-        // }
-
-        // private Stmt Statement()
-        // {
-        //     if (Match(TokenType.Break))
-        //         return BreakStatement();
-
-        //     if (Match(TokenType.For))
-        //         return ForStatement();
-
-        //     if (Match(TokenType.If))
-        //         return IfStatement();
-
-        //     if (Match(TokenType.Print))
-        //         return PrintStatement();
-
-        //     if (Match(TokenType.Return))
-        //         return ReturnStatement();
-
-        //     if (Match(TokenType.While))
-        //         return WhileStatement();
-
-        //     if (Match(TokenType.LeftBrace))
-        //         return new Stmt.Block(Block());
-
-        //     return ExpressionStatement();
-        // }
-
-        // private Stmt ReturnStatement()
-        // {
-        //     var keyword = Previous();
-
-        //     Expr value = null;
-        //     if (!Check(TokenType.Semicolon))
-        //     {
-        //         value = Expression();
-        //     }
-
-        //     Consume(TokenType.Semicolon, "Expect ';' after return value.");
-        //     return new Stmt.Return(keyword, value);
-        // }
-
-        // private Stmt BreakStatement()
-        // {
-        //     if (_loopDepth == 0)
-        //     {
-        //         Error(Previous(), "Must be inside a loop to use 'break'.");
-        //     }
-
-        //     Consume(TokenType.Semicolon, "Expect ';' after 'break'.");
-
-        //     return new Stmt.Break();
-        // }
-
-        // private Stmt ForStatement()
-        // {
-        //     // TODO: for loop: condition can't be nothing
-        //     try
-        //     {
-        //         _loopDepth++;
-
-        //         Consume(TokenType.LeftParenthesis, "Expect '(' after 'for'.");
-
-        //         Stmt initializer;
-        //         if (Match(TokenType.Semicolon))
-        //             initializer = null;
-        //         else if (Match(TokenType.Var))
-        //             initializer = VarDeclaration();
-        //         else
-        //             initializer = ExpressionStatement();
-
-        //         Expr condition = null;
-        //         if (!Match(TokenType.Semicolon))
-        //         {
-        //             condition = Expression();
-        //             Consume(TokenType.Semicolon, "Expect ';' after loop condition.");
-        //         }
-
-        //         Expr increment = null;
-        //         if (!Match(TokenType.Semicolon))
-        //             increment = Expression();
-        //         Consume(TokenType.RightParenthesis, "Expect ')' after for clauses");
-
-        //         var body = Statement();
-
-        //         if (increment != null)
-        //         {
-        //             body = new Stmt.Block(new List<Stmt> { body, new Stmt.Expression(increment) });
-        //         }
-
-        //         body = new Stmt.While(condition ?? new Expr.Literal(true), body);
-
-        //         if (initializer != null)
-        //         {
-        //             body = new Stmt.Block(new List<Stmt> { initializer, body });
-        //         }
-
-        //         return body;
-        //     }
-        //     finally
-        //     {
-        //         _loopDepth--;
-        //     }
-        // }
-
-        // private Stmt WhileStatement()
-        // {
-        //     try
-        //     {
-        //         _loopDepth++;
-
-        //         Consume(TokenType.LeftParenthesis, "Expect '(' after 'while'.");
-        //         Expr condition = Expression();
-        //         Consume(TokenType.RightParenthesis, "Expect ')' after condition.");
-        //         Stmt body = Statement();
-
-        //         return new Stmt.While(condition, body);
-        //     }
-        //     finally
-        //     {
-        //         _loopDepth--;
-        //     }
-        // }
-
-        // private Stmt IfStatement()
-        // {
-        //     Consume(TokenType.LeftParenthesis, "Expect '(' after 'if'.");
-        //     Expr condition = Expression();
-        //     Consume(TokenType.RightParenthesis, "Expect ')' after if condition.");
-
-        //     var thenBranch = Statement();
-
-        //     Stmt elseBranch = null;
-        //     if (Match(TokenType.Else))
-        //     {
-        //         elseBranch = Statement();
-        //     }
-
-        //     return new Stmt.If(condition, thenBranch, elseBranch);
-        // }
-
-        // private IReadOnlyList<Stmt> Block()
-        // {
-        //     var statements = new List<Stmt>();
-
-        //     while (!Check(TokenType.RightBrace) && !IsAtEnd())
-        //     {
-        //         statements.Add(Declaration());
-        //     }
-
-        //     Consume(TokenType.RightBrace, "Expect '}' after block.");
-        //     return statements;
-        // }
-
-        // private Stmt ExpressionStatement()
-        // {
-        //     var value = Expression();
-        //     Consume(TokenType.Semicolon, "Expected ';' after value.");
-        //     return new Stmt.Expression(value);
-        // }
-
-        // private Stmt PrintStatement()
-        // {
-        //     var value = Expression();
-        //     Consume(TokenType.Semicolon, "Expected ';' after value.");
-        //     return new Stmt.Print(value);
-        // }
+        private Stmt ExpressionStatement()
+        {
+            var value = Expression();
+            Consume(TokenType.Semicolon, "Expected ';' after value.");
+            return new Stmt.Expression(value);
+        }
 
         private Expr Expression()
         {
@@ -476,14 +286,7 @@ namespace LoxSharp
 
                 switch (Peek().Type)
                 {
-                    case TokenType.Class:
-                    case TokenType.Fun:
                     case TokenType.Var:
-                    case TokenType.For:
-                    case TokenType.If:
-                    case TokenType.While:
-                    case TokenType.Print:
-                    case TokenType.Return:
                         return;
                 }
 

@@ -2,36 +2,48 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LoxSharp
+namespace RuleEngine.LoxSharp
 {
-    public class Interpreter : IExprVisitor<object>
+    public class Interpreter : IExprVisitor<object>, IStmtVisitor<object>
     {
         public enum ExecuteResult
         {
             Continue,
-            Break
+            Break,
         }
 
-        public Interpreter(IOutput output)
+        public Interpreter()
         {
             _environment = Globals = new Environment();
-            _output = output;
         }
 
         private static object _undefined = new object();
         public Environment Globals { get; private set; }
         private Environment _environment;
         private readonly object _breakInterrupt = new object();
-        private readonly IOutput _output;
+        public OperationLog _log;
 
-        public string Interpret(Expr expression) { 
-            try {
-                Object value = Evaluate(expression);
-                return Stringify(value);
-            } catch (RuntimeException error) {
-                Lox.RuntimeError(error);
-                return error.ToString();
+        public OperationLog Interpret(List<Stmt> statements)
+        {
+            _log = new OperationLog();
+
+            try
+            {
+                foreach (var stmt in statements)
+                {
+                    Execute(stmt);
+                }
             }
+            catch (RuntimeException ex)
+            {
+                _log.WriteError(Lox.RuntimeError(ex));
+            }
+            return _log;
+        }
+
+        private ExecuteResult Execute(Stmt stmt)
+        {
+            return stmt?.Accept(this) == _breakInterrupt ? ExecuteResult.Break : ExecuteResult.Continue;
         }
 
         private string Stringify(object value)
@@ -200,6 +212,13 @@ namespace LoxSharp
             return expression.Accept(this);
         }
 
+        public object VisitExpressionStmt(Stmt.Expression stmt)
+        {
+            object result = Evaluate(stmt.Expr);
+            _log.WriteLine(result.ToString());
+            return null;
+        }
+
         public object VisitVariableExpr(Expr.Variable expr)
         {
             var value = _environment.Get(expr.Name);
@@ -209,6 +228,18 @@ namespace LoxSharp
             return value;
         }
 
+        public object VisitVarStmt(Stmt.Var stmt)
+        {
+            object value = _undefined;
+
+            if (stmt.Initializer != null)
+                value = Evaluate(stmt.Initializer);
+
+            _environment.Define(stmt.Name.Lexeme, value);
+
+            return null;
+        }
+
         public object VisitAssignExpr(Expr.Assign expr)
         {
             var value = Evaluate(expr.Value);
@@ -216,9 +247,6 @@ namespace LoxSharp
             _environment.Assign(expr.Name, value);
             return value;
         }
-
-        // var thing = this && that;
-        // var thing = this || that;
 
         public object VisitLogicalExpr(Expr.Logical expr)
         {

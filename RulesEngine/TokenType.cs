@@ -2,17 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LoxSharp
+namespace RuleEngine.LoxSharp
 {
     public enum TokenType
     {
         // Single-character tokens
         LeftParenthesis,
         RightParenthesis,
-
-        LeftBrace,
-        RightBrace,
-
+        
         Plus,
         Minus,
         Slash,
@@ -44,22 +41,13 @@ namespace LoxSharp
         // Keywords
         And,
         Or,
-        Class,
-        If,
-        Else,
+        Xor,
         True,
         False,
-        Fun,
-        For,
-        While,
         Nil,
-        Print,
-        Return,
-        Super,
-        This,
         Var,
-        Break,
-
+        Rule,
+        Evaluate,
         EOF
     }
 }

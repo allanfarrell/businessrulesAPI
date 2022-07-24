@@ -33,6 +33,7 @@
 /home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/bin/Debug/net6.0/RulesEngine.dll
 /home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/bin/Debug/net6.0/RulesEngine.pdb
 /home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/bin/Debug/net6.0/Microsoft.OpenApi.dll
+/home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/bin/Debug/net6.0/Newtonsoft.Json.dll
 /home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/bin/Debug/net6.0/Swashbuckle.AspNetCore.Swagger.dll
 /home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/bin/Debug/net6.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /home/auron/Vault23/workspace/MortgageHouse/businessrulesAPI/bin/Debug/net6.0/Swashbuckle.AspNetCore.SwaggerUI.dll
