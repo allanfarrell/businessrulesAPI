@@ -1,6 +1,8 @@
 # businessrulesAPI
 
-### Build image
+## Docker Build Instructions
+
+### Build image from Dockerfile
 ```script
 sudo docker build -t rulesengine .
 ```
@@ -17,10 +19,20 @@ http://localhost:8080/swagger/index.html
 
 ### List docker containers
 ```script
-sudo docker container ls -a
+sudo docker ps
 ```
 
 ### View log for a container
 ```script
 sudo docker logs <container_id>
+```
+
+### Stop running container
+```script
+sudo docker stop <container_id>
+```
+
+### Remove container
+```script
+sudo docker rm <container_id>
 ```
