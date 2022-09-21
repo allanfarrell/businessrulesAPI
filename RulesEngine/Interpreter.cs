@@ -36,7 +36,7 @@ namespace RuleEngine.LoxSharp
             }
             catch (RuntimeException ex)
             {
-                _log.WriteError(Lox.RuntimeError(ex));
+                _log.WriteError(RuleService.RuntimeError(ex));
             }
             return _log;
         }

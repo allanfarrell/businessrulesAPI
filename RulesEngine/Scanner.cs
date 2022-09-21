@@ -100,7 +100,7 @@ namespace RuleEngine.LoxSharp
                     }
                     else
                     {
-                        _output.WriteError(Lox.Error(_line, $"Unexpected character: {c}"));
+                        _output.WriteError(RuleService.Error(_line, $"Unexpected character: {c}"));
                     }
                     break;
             }
@@ -154,7 +154,7 @@ namespace RuleEngine.LoxSharp
 
             if (IsAtEnd())
             {
-                _output.WriteError(Lox.Error(_line, "Unterminated String."));
+                _output.WriteError(RuleService.Error(_line, "Unterminated String."));
                 return;
             }
 

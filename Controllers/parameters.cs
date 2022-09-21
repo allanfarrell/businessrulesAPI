@@ -7,11 +7,6 @@ namespace RuleService.Parameters
     {
         private Dictionary<string, object> _parameters;
 
-        public void LoadParameters(string parametersJSON)
-        {
-            _parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(parametersJSON);
-        }
-
         public string FindParameterValue(string key)
         {
             return _parameters.ContainsKey(key) ? _parameters[key].ToString() : throw new Exception("Invalid parameter.");
@@ -20,8 +15,7 @@ namespace RuleService.Parameters
         public string ConvertToLoxStatements()
         {
             StringBuilder sb = new StringBuilder();
-            Console.WriteLine(_parameters);
-            if(_parameters != null && _parameters.Count > 0)
+            if(!IsNullOrEmpty())
             {
                 foreach(var p in _parameters)
                 {
@@ -35,8 +29,28 @@ namespace RuleService.Parameters
             return sb.ToString();
         }
 
-        public bool IsNullOrEmpty() {
+        public bool ValidateJSON(string JSON)
+        {
+            try
+            {
+                Dictionary<string, object> tmpObj = JsonConvert.DeserializeObject<Dictionary<string, object>>(JSON);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool LoadParameters(string parametersJSON)
+        {
+            _parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(parametersJSON);
+        }
+
+        private bool IsNullOrEmpty() {
            return (_parameters == null || _parameters.Count < 1);
         }
+
+
     }
 }

@@ -271,7 +271,7 @@ namespace RuleEngine.LoxSharp
 
         private ParseException Error(Token token, string message)
         {
-            _output.WriteError(Lox.Error(token, message));
+            _output.WriteError(RuleService.Error(token, message));
 
             return new ParseException();
         }

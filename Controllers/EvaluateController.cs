@@ -14,11 +14,11 @@ public class EvaluateController : ControllerBase
     public IActionResult ValidateInputs(string line, string parameters)
     {
         Parameters param = new Parameters();
-        if(ValidateKeyValuePair(parameters)) {
+        if(param.ValidateJSON(parameters)) {
             param.LoadParameters(parameters);
         }
         else {
-            return Ok("Invalid parameters.");
+            return Ok("Invalid parameters.\n" + parameters);
         }
 
         if(!line.TrimEnd().EndsWith(";"))
@@ -37,22 +37,5 @@ public class EvaluateController : ControllerBase
     public IActionResult EvaluateRule(string rule_uuid, string parameters)
     {
         return Ok("Evaluate, Rule: {rule_uid} Parameters: {parameters}");
-    }
-
-    private Boolean ValidateKeyValuePair(string JSON)
-    {
-        try
-        {
-            Dictionary<string, object> tmpObj = JsonConvert.DeserializeObject<Dictionary<string, object>>(JSON);
-            return true;
-        }
-        catch (FormatException fex)
-        {
-            return false;
-        }
-        catch (Exception ex)
-        {
-            return false;
-        }
     }
 }
